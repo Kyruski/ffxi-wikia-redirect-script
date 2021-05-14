@@ -5,7 +5,6 @@
 // @match        https://ffxiclopedia.fandom.com/*
 // @description     Auto Redirect the FFXI Wikia to an in era edit for Wings of the Goddess
 // @run-at      document-end
-// @namespace https://greasyfork.org/users/771886
 // ==/UserScript==
 (async function () {
   const historyLinkClass = "mw-changeslist-date";
@@ -26,22 +25,23 @@
     'December': 11,
   }
 
-  const setPage = async (url) => {
+  //grabs the DOM for the desired page
+  const grabDOM = async (url) => {
     const response = await fetch(url);
     const text = await response.text();
     return await new DOMParser().parseFromString(text, 'text/html');
   }
 
   const currentURL = window.location.href //define current URL
-  if (!currentURL.includes('?oldid=')) {
-    const pageDom = await setPage(currentURL + '?offset=&limit=500&action=history')
-    const historyList = await pageDom.getElementsByClassName(historyLinkClass);
-    for (let el of historyList) {
-      let pageDate = el.innerHTML.replace(',', '').replace(':', ' ').split(' ');
-      let compareDate = new Date(pageDate[4], months[pageDate[3]], pageDate[2], pageDate[0], pageDate[1]);
-      if (cutOffDate > compareDate) {
-        window.location.href = el.href;
-        break;
+  if (!currentURL.includes('oldid=') && !currentURL.includes('action=history') && !currentURL.includes('Main_Page')) { //only run if the current page isn't old, isn't the history page, or the main page
+    const pageDom = await grabDOM(currentURL + '?offset=&limit=500&action=history') //grab history w/ 500 results
+    const historyList = pageDom.getElementsByClassName(historyLinkClass); //select the history links
+    for (let el of historyList) { //for each link
+      let pageDate = el.innerHTML.replace(',', '').replace(':', ' ').split(' '); //take the date and split it into [Hour, Minute, Day, Month, Year]
+      let compareDate = new Date(pageDate[4], months[pageDate[3]], pageDate[2], pageDate[0], pageDate[1]); //parse into javascript Date object
+      if (cutOffDate > compareDate) { //compare if date is older than cut off date
+        window.location.href = el.href; //if older, set window to that url
+        break; //stop the function running
       }
     }
   }
