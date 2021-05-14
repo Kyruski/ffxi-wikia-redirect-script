@@ -5,6 +5,7 @@
 // @match        https://ffxiclopedia.fandom.com/*
 // @description     Auto Redirect the FFXI Wikia to an in era edit for Wings of the Goddess
 // @run-at      document-end
+// @namespace https://greasyfork.org/users/771886
 // ==/UserScript==
 (async function () {
   const historyLinkClass = "mw-changeslist-date";
